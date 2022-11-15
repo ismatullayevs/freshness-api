@@ -9,7 +9,7 @@ from imagekit.processors import ResizeToFill
 
 class CustomUser(AbstractUser):
     username = None
-    email = models.EmailField(_('Email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True)
     phone_number = PhoneNumberField(blank=True)
     avatar = models.ImageField(upload_to='avatars', blank=True, null=True)
     avatar_thumbnail = ImageSpecField(source='avatar', processors=[
