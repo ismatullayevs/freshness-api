@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from slugify import slugify
+from django.db.models import Avg
 
 
 class Category(models.Model):
@@ -12,6 +13,13 @@ class Category(models.Model):
             self.slug = slugify(self.title)
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+class Tag(models.Model):
+    title = models.CharField(max_length=32)
 
     def __str__(self):
         return self.title
@@ -29,6 +37,7 @@ class Item(models.Model):
     discount = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(100)], blank=True, null=True)
     slug = models.SlugField(blank=True, unique=True)
+    tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
         return self.title
@@ -43,7 +52,10 @@ class Item(models.Model):
         if not self.discount:
             return self.price
 
-        return (self.price * (100 - self.discount)) / 100
+        return round((self.price * (100 - self.discount)) / 100, 2)
+
+    def get_average_rating(self):
+        return self.reviews.aggregate(Avg('rating'))['rating__avg']
 
     class Meta:
         ordering = ('-modified_at',)
